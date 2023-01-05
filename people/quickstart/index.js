@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * Copyright 2022 Google LLC
  *
@@ -27,7 +28,7 @@ const SCOPES = ['https://www.googleapis.com/auth/contacts.readonly'];
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+const CREDENTIALS_PATH = path.join(process.cwd(), 'application_credentials.json');
 
 /**
  * Reads previously authorized credentials from the save file.
@@ -82,6 +83,28 @@ async function authorize() {
   return client;
 }
 
+// https://stackoverflow.com/a/67382819/2752308 :
+async function getResourceNamesFromContactIds(contactIds) { // contactIds: array with valid contactIds
+  const resourceName = 'people/me';
+  const optionalArgs = {
+    personFields: 'metadata',
+    sources: 'READ_SOURCE_TYPE_CONTACT',
+  };
+  const connections = People.People.Connections.list(resourceName, optionalArgs)['connections'];
+  const mapping = contactIds.map((contactId) => {
+    const foundConnection = connections.find((connection) => {
+      return contactId == connection['metadata']['sources'][0]['id'];
+    });
+    if (foundConnection) {
+      return {
+        contactId: contactId,
+        resourceName: foundConnection['resourceName'],
+      };
+    }
+  }).filter((el) => el);
+  return mapping;
+}
+
 /**
  * Print the display name if available for 10 connections.
  *
@@ -91,7 +114,11 @@ async function listConnectionNames(auth) {
   const service = google.people({version: 'v1', auth});
   const res = await service.people.connections.list({
     resourceName: 'people/me',
-    pageSize: 10,
+    pageSize: 1000,
+    // https://stackoverflow.com/questions/67707416/google-people-api-search-contacts-in-a-specific-group-and-contacts-updated-afte
+    // https://stackoverflow.com/questions/68362009/google-people-api-get-contact-by-a-specific-group?rq=1
+    // https://stackoverflow.com/questions/46349746/is-there-any-way-that-i-can-retrieve-account-id-from-google-contact-api-v3-to-ma/46355535#46355535
+    // https://stackoverflow.com/questions/54830076/google-people-api-c-sharp-code-to-get-list-of-contact-groups
     personFields: 'names,emailAddresses',
   });
   const connections = res.data.connections;
@@ -108,7 +135,6 @@ async function listConnectionNames(auth) {
     }
   });
 }
-
 authorize().then(listConnectionNames).catch(console.error);
 
 // [END people_quickstart]

@@ -25,7 +25,11 @@ module.exports = {
   },
   'rules': {
     'require-jsdoc': 'off',
+    'semi': [2, 'always'],
     'max-len': ['error', {'code': 100}],
+    // windows linebreaks when not in production environment
+    'linebreak-style': ['error', process.env.NODE_ENV === 'prod' ? 'unix' : 'windows'], 
+    // https://stackoverflow.com/a/39122799/2752308
     'camelcase': ['error', {
       'ignoreDestructuring': true,
       'ignoreImports': true,

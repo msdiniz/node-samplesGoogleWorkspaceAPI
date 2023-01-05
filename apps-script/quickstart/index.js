@@ -27,7 +27,7 @@ const SCOPES = ['https://www.googleapis.com/auth/script.projects'];
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
+const CREDENTIALS_PATH = path.join(process.cwd(), 'application_credentials.json');
 
 /**
  * Reads previously authorized credentials from the save file.
