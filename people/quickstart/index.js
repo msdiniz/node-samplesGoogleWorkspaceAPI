@@ -114,13 +114,14 @@ async function listConnectionNames(auth) {
   const service = google.people({version: 'v1', auth});
   const res = await service.people.connections.list({
     resourceName: 'people/me',
-    pageSize: 1000,
+    pageSize: 10,
     // https://stackoverflow.com/questions/67707416/google-people-api-search-contacts-in-a-specific-group-and-contacts-updated-afte
     // https://stackoverflow.com/questions/68362009/google-people-api-get-contact-by-a-specific-group?rq=1
     // https://stackoverflow.com/questions/46349746/is-there-any-way-that-i-can-retrieve-account-id-from-google-contact-api-v3-to-ma/46355535#46355535
     // https://stackoverflow.com/questions/54830076/google-people-api-c-sharp-code-to-get-list-of-contact-groups
     personFields: 'names,emailAddresses',
   });
+
   const connections = res.data.connections;
   if (!connections || connections.length === 0) {
     console.log('No connections found.');
@@ -134,7 +135,16 @@ async function listConnectionNames(auth) {
       console.log('No display name found for connection.');
     }
   });
+
+  const groups = await service.people.contactGroups.list({
+    prettyPrint: true,
+  });
+  // const allgroups = groups.data.connections;
+  groups.forEach((group) => {
+    console.log(group);
+  });
 }
+
 authorize().then(listConnectionNames).catch(console.error);
 
 // [END people_quickstart]
